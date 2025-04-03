@@ -1,6 +1,6 @@
 # NFT Minting API for Thirdweb
 
-![Project Banner](https://i.imgur.com/RxGQIXW.png)
+![Project Banner](https://images.pexels.com/photos/12188470/pexels-photo-12188470.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)
 
 A secure, production-ready REST API for creating and managing NFTs on the Ethereum blockchain (Sepolia testnet) using Thirdweb SDK. This API allows both preparation of NFT metadata and direct minting capabilities through authenticated endpoints.
 
@@ -489,7 +489,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the ISC License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
