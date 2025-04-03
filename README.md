@@ -21,6 +21,7 @@ A secure, production-ready REST API for creating and managing NFTs on the Ethere
   - [Prepare NFT Minting](#prepare-nft-minting)
   - [Direct NFT Minting](#direct-nft-minting)
   - [Query Wallet NFTs](#query-wallet-nfts)
+  - [Private Key Testing](#private-key-testing)
 - [Security Best Practices](#security-best-practices)
 - [Error Handling](#error-handling)
 - [Deployment](#deployment)
@@ -38,6 +39,7 @@ A secure, production-ready REST API for creating and managing NFTs on the Ethere
 - **Wallet Integration**: Query NFTs owned by specific wallets
 - **Comprehensive Security**: API key authentication, input validation, and secure secret management
 - **Contract Metadata**: Retrieve information about the deployed NFT contract
+- **Private Key Testing**: Utility endpoint to validate private key formats
 - **Production-Ready**: Full error handling, rate limiting, and secure configuration
 - **Secure Credential Management**: All API keys and secrets are stored in environment variables, never in code
 
@@ -46,7 +48,7 @@ A secure, production-ready REST API for creating and managing NFTs on the Ethere
 - **Runtime**: Node.js
 - **API Framework**: Express.js
 - **Blockchain**: Ethereum (Sepolia Testnet)
-- **NFT Framework**: Thirdweb SDK
+- **NFT Framework**: Thirdweb SDK v5
 - **Security**: Helmet (HTTP headers), CORS protection, Environment-based configuration
 - **Development**: Nodemon (hot-reload)
 
@@ -57,9 +59,10 @@ The API follows a modular service-based architecture:
 ```
 ├── src/
 │   ├── server.js         # Main Express application
-│   ├── services/
-│   │   └── nftService.js # NFT operations and blockchain interactions
-│   └── scripts/          # Utility scripts for maintenance
+│   ├── index.js          # Alternative entry point
+│   ├── test-env.js       # Environment testing utility
+│   └── services/
+│       └── nftService.js # NFT operations and blockchain interactions
 ├── .env                  # Environment configuration (not committed to version control)
 └── thirdweb.js           # Thirdweb client initialization using environment variables
 ```
@@ -327,6 +330,31 @@ GET /api/nfts/0x...
 
 This endpoint is maintained for backward compatibility but will be removed in future versions.
 
+### Private Key Testing
+
+Test a private key's format and get the associated wallet address.
+
+**Request**:
+
+```
+POST /api/test/private-key
+Content-Type: application/json
+
+{
+  "privateKey": "your_private_key_here"
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "message": "Private key format is valid",
+  "address": "0xAssociatedWalletAddress"
+}
+```
+
 ## Security Best Practices
 
 1. **API Key Authentication**:
@@ -416,10 +444,19 @@ RUN npm ci --only=production
 
 COPY . .
 
+# Create .env file from environment variables
+RUN echo "THIRDWEB_CLIENT_ID=$THIRDWEB_CLIENT_ID" > .env && \
+    echo "THIRDWEB_SECRET_KEY=$THIRDWEB_SECRET_KEY" >> .env && \
+    echo "NFT_CONTRACT_ADDRESS=$NFT_CONTRACT_ADDRESS" >> .env && \
+    echo "PORT=$PORT" >> .env && \
+    echo "SERVER_API_KEY=$SERVER_API_KEY" >> .env
+
 EXPOSE 5050
 
 CMD ["node", "src/server.js"]
 ```
+
+⚠️ **Security Warning**: The above Dockerfile is a basic example. In a production environment, you should use Docker secrets or a secure vault solution to manage sensitive information rather than environment variables.
 
 ## Performance Considerations
 
@@ -489,7 +526,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the ISC License - see the LICENSE file for details.
 
 ---
 
