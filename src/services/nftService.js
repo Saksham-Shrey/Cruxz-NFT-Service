@@ -101,7 +101,7 @@ export async function mintTextNFT(
 
     // Create metadata for the NFT
     const metadata = {
-      name: `Text NFT #${Date.now()}`,
+      name: "CRUXZ NFT",
       description: description || "CRUXZ NFT", // Use provided description or fall back to text
       attributes: [
         {
