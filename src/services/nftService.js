@@ -80,6 +80,7 @@ export async function getContractInfo(client) {
  * @param {boolean} performMint - Whether to actually perform the mint or just prepare
  * @param {string} privateKey - The private key to sign the transaction
  * @param {string} toAddress - The address to mint the NFT to (mandatory, wallet address)
+ * @param {string} description - Custom description for the NFT (optional)
  * @returns {Promise<Object>} The minting result
  */
 export async function mintTextNFT(
@@ -87,7 +88,8 @@ export async function mintTextNFT(
   text,
   performMint = false,
   privateKey = null,
-  toAddress = null
+  toAddress = null,
+  description = null
 ) {
   try {
     // Connect to the contract
@@ -100,7 +102,7 @@ export async function mintTextNFT(
     // Create metadata for the NFT
     const metadata = {
       name: `Text NFT #${Date.now()}`,
-      description: text,
+      description: description || "CRUXZ NFT", // Use provided description or fall back to text
       attributes: [
         {
           trait_type: "Text",
@@ -231,13 +233,15 @@ export async function mintTextNFT(
  * @param {string} text - The text to be included in the NFT
  * @param {string} privateKey - The private key to sign the transaction
  * @param {string} toAddress - The address to mint the NFT to (mandatory wallet address)
+ * @param {string} description - Custom description for the NFT (optional)
  * @returns {Promise<Object>} The minting result
  */
 export async function mintTextNFTWithPrivateKey(
   client,
   text,
   privateKey,
-  toAddress = null
+  toAddress = null,
+  description = null
 ) {
   try {
     // Validate required parameters
@@ -249,93 +253,10 @@ export async function mintTextNFTWithPrivateKey(
       throw new Error("Wallet address (toAddress) is required for minting");
     }
 
-    // Connect to the contract
-    const contract = await getContract({
-      client,
-      chain: sepolia,
-      address: process.env.NFT_CONTRACT_ADDRESS,
-    });
-
-    // Create metadata for the NFT
-    const metadata = {
-      name: `Text NFT #${Date.now()}`,
-      description: text,
-      attributes: [
-        {
-          trait_type: "Text",
-          value: text,
-        },
-        {
-          trait_type: "Created At",
-          value: new Date().toISOString(),
-        },
-      ],
-    };
-
-    // Convert metadata to URI format
-    const metadataUri = `data:application/json;base64,${Buffer.from(
-      JSON.stringify(metadata)
-    ).toString("base64")}`;
-
-    // Format private key
-    const privateKeyStr = privateKey.trim();
-    if (privateKeyStr.length !== 64 && privateKeyStr.length !== 66) {
-      throw new Error(
-        `Invalid private key length: ${privateKeyStr.length}. Expected 64 or 66 characters.`
-      );
-    }
-
-    // Remove 0x prefix if present
-    const formattedPrivateKey = privateKeyStr.startsWith("0x")
-      ? privateKeyStr.substring(2)
-      : privateKeyStr;
-
-    // Create account from private key
-    const account = privateKeyToAccount({
-      privateKey: formattedPrivateKey,
-      client,
-    });
-
-    // Use the provided recipient address
-    const recipientAddress = toAddress;
-
-    // Create a transaction to mint the NFT
-    const transaction = await prepareContractCall({
-      contract,
-      method: "function mintTo(address _to, string _uri) returns (uint256)",
-      params: [recipientAddress, metadataUri],
-    });
-
-    // Sign and send the transaction
-    const result = await sendTransaction({
-      transaction,
-      account,
-    });
-
-    // Get the token ID from the receipt if possible
-    let tokenId = "unknown";
-    try {
-      // Try to extract token ID from logs or events
-      const events = result.receipt.logs;
-      // Typically the token ID is in the Transfer event
-      tokenId = events && events.length > 0 ? events[0].topics[3] : "unknown";
-    } catch (error) {
-      console.warn("Could not extract token ID from transaction", error);
-    }
-
-    return {
-      status: "minted",
-      tokenId,
-      transactionHash: result.transactionHash,
-      to: recipientAddress,
-      metadata,
-    };
+    // Call the main mint function with performMint=true
+    return await mintTextNFT(client, text, true, privateKey, toAddress, description);
   } catch (error) {
     console.error("Error in mintTextNFTWithPrivateKey:", error);
-    if (error.message.includes("replace")) {
-      console.error("Private key formatting error:", error);
-      throw new Error("Failed to mint NFT: Invalid private key format");
-    }
     throw new Error(`Failed to mint NFT: ${error.message}`);
   }
 }

@@ -94,7 +94,7 @@ router.get("/contract", async (req, res) => {
 // NFT Minting Routes
 router.post("/mint/text/prepare", async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, description } = req.body;
 
     if (!text) {
       return res.status(400).json({
@@ -103,7 +103,7 @@ router.post("/mint/text/prepare", async (req, res) => {
       });
     }
 
-    const result = await mintTextNFT(client, text, false);
+    const result = await mintTextNFT(client, text, false, null, null, description);
 
     res.json({
       success: true,
@@ -125,7 +125,7 @@ router.post("/mint/text/prepare", async (req, res) => {
 
 router.post("/mint/text", async (req, res) => {
   try {
-    const { text, privateKey, toAddress } = req.body;
+    const { text, privateKey, toAddress, description } = req.body;
 
     if (!text) {
       return res.status(400).json({
@@ -151,7 +151,7 @@ router.post("/mint/text", async (req, res) => {
     console.log("Attempting to mint NFT with text:", text);
 
     // Call mintTextNFT with performMint=true to actually mint
-    const result = await mintTextNFT(client, text, true, privateKey, toAddress);
+    const result = await mintTextNFT(client, text, true, privateKey, toAddress, description);
 
     if (result.status === "minted") {
       res.json({
